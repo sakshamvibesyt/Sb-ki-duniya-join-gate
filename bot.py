@@ -1,11 +1,12 @@
+import asyncio
 import logging
 from telegram import Update
 from telegram.ext import (
-    Application,
-    ChatMemberHandler,
-    CommandHandler,
-    CallbackQueryHandler,
-    ContextTypes,
+Application,
+ChatMemberHandler,
+CommandHandler,
+CallbackQueryHandler,
+ContextTypes,
 )
 
 from config import BOT_TOKEN
@@ -13,52 +14,64 @@ from handlers.join_gate import handle_new_member, verify_callback
 from handlers.admin import gate_command, ungate_command
 
 logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    level=logging.INFO,
+format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+level=logging.INFO,
 )
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(name)
 
-
-async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE):
-    logger.error("Exception while handling update:", exc_info=context.error)
-
+async def error_handler(
+update: object,
+context: ContextTypes.DEFAULT_TYPE,
+):
+logger.error(
+"Exception while handling update:",
+exc_info=context.error,
+)
 
 def main():
-    if not BOT_TOKEN:
-        raise ValueError("BOT_TOKEN is missing from Render Environment Variables.")
+if not BOT_TOKEN:
+raise ValueError(
+"BOT_TOKEN is missing from Render Environment Variables."
+)
 
-    app = Application.builder().token(BOT_TOKEN).build()
+# Initialize the event loop before starting polling.
+try:
+    asyncio.get_event_loop()
+except RuntimeError:
+    asyncio.set_event_loop(asyncio.new_event_loop())
 
-    # New members joining the group
-    app.add_handler(
-        ChatMemberHandler(
-            handle_new_member,
-            ChatMemberHandler.CHAT_MEMBER,
-        )
+app = Application.builder().token(BOT_TOKEN).build()
+
+# New members joining the group
+app.add_handler(
+    ChatMemberHandler(
+        handle_new_member,
+        ChatMemberHandler.CHAT_MEMBER,
     )
+)
 
-    # Verify button
-    app.add_handler(
-        CallbackQueryHandler(
-            verify_callback,
-            pattern=r"^verify$",
-        )
+# Verify button
+app.add_handler(
+    CallbackQueryHandler(
+        verify_callback,
+        pattern=r"^verify$",
     )
+)
 
-    # Admin commands
-    app.add_handler(CommandHandler("gate", gate_command))
-    app.add_handler(CommandHandler("ungate", ungate_command))
+# Admin commands
+app.add_handler(CommandHandler("gate", gate_command))
+app.add_handler(CommandHandler("ungate", ungate_command))
 
-    app.add_error_handler(error_handler)
+# Error handler
+app.add_error_handler(error_handler)
 
-    logger.info("Join Gate Bot started.")
+logger.info("Join Gate Bot started.")
 
-    app.run_polling(
-        allowed_updates=Update.ALL_TYPES,
-        drop_pending_updates=True,
-    )
+app.run_polling(
+    allowed_updates=Update.ALL_TYPES,
+    drop_pending_updates=True,
+)
 
-
-if __name__ == "__main__":
-    main()
+if name == "main":
+main()
