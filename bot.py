@@ -21,12 +21,12 @@ level=logging.INFO,
 logger = logging.getLogger(name)
 
 async def error_handler(
-update: object,
-context: ContextTypes.DEFAULT_TYPE,
+    update: object,
+    context: ContextTypes.DEFAULT_TYPE,
 ):
-logger.error(
-"Exception while handling update:",
-exc_info=context.error,
+    logger.error(
+        "Exception while handling update:",
+        exc_info=context.error,
 )
 
 def main():
