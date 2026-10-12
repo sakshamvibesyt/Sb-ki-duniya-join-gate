@@ -1,5 +1,6 @@
 import asyncio
 import logging
+
 from telegram import Update
 from telegram.ext import (
 Application,
@@ -21,12 +22,12 @@ level=logging.INFO,
 logger = logging.getLogger(name)
 
 async def error_handler(
-    update: object,
-    context: ContextTypes.DEFAULT_TYPE,
+update: object,
+context: ContextTypes.DEFAULT_TYPE,
 ):
-    logger.error(
-        "Exception while handling update:",
-        exc_info=context.error,
+logger.error(
+"Exception while handling update:",
+exc_info=context.error,
 )
 
 def main():
@@ -35,7 +36,6 @@ raise ValueError(
 "BOT_TOKEN is missing from Render Environment Variables."
 )
 
-# Initialize the event loop before starting polling.
 try:
     asyncio.get_event_loop()
 except RuntimeError:
@@ -43,7 +43,7 @@ except RuntimeError:
 
 app = Application.builder().token(BOT_TOKEN).build()
 
-# New members joining the group
+# Handle new members
 app.add_handler(
     ChatMemberHandler(
         handle_new_member,
@@ -51,7 +51,7 @@ app.add_handler(
     )
 )
 
-# Verify button
+# Verification button
 app.add_handler(
     CallbackQueryHandler(
         verify_callback,
@@ -63,7 +63,7 @@ app.add_handler(
 app.add_handler(CommandHandler("gate", gate_command))
 app.add_handler(CommandHandler("ungate", ungate_command))
 
-# Error handler
+# Error handling
 app.add_error_handler(error_handler)
 
 logger.info("Join Gate Bot started.")
